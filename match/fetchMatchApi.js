@@ -7,7 +7,7 @@ const apiUrl = 'https://v3.football.api-sports.io/fixtures';
 const config = {
   method: 'GET',
   url: apiUrl,
-  params: { league: leagueId, season: '2023',next:99},
+  params: { league: leagueId, season: '2023',last:99},
   headers: {
     'x-rapidapi-key': apiKey,
   },

@@ -10,7 +10,7 @@ const router=require('./route/index');
 const { autoRun } = require("./autorun");
 const { extractClubInfo, storeChannel } = require("./controller/ChannelIdController");
 const { channelUrls } = require("./const");
-const { storematch } = require("./match/matchList");
+const { storematch, upcommingMatchApi } = require("./match/matchList");
 const { matchApi } = require("./match/fetchMatchApi");
 const { fetchHighlight } = require("./controller/fetchAPI");
 mongoose.connect("mongodb+srv://bereketdinku:beki1234@cluster0.69ripac.mongodb.net/youtube",{ useNewUrlParser: true, serverSelectionTimeoutMS: 30000 });
@@ -33,5 +33,5 @@ app.use("/api/highlight", router);
 // storeChannel()
 // matchApi()
 // fetchHighlight('2024-02-17T15:00:00.000+00:00')
- 
-autoRun(1035327)
+//  upcommingMatchApi()
+autoRun()

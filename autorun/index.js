@@ -1,67 +1,63 @@
 const schedule = require('node-schedule');
-const storeHighlight=require('../controller/storeVideoUrl')
-const ChannelId=require('../model/ChannelId')
-const Match=require('../model/premieldgeMatch')
-const Highlight=require('../model/youtubeHighlight')
-const fetchHighlight=require('../controller/fetchAPI')
-async function autoRun(fixtureId){
-    const data=await Match.findOne({fixtureId})
-    const name=data.name
-    const date=data.fixtureDate
-    // console.log(name)
-    const away=data.away
-    // const nameChannel=await ChannelId.findOne({name:name});
-    // const nameChannelId=nameChannel.ChannelId;
-    // console.log(nameChannel)
-    // const awayChannel=ChannelId.find({name:away})
-    // const awayChannelId=awayChannel.ChannelId
-    try {
-        const name = 'Everton'; // Replace with the desired name
-        const nameChannel = await ChannelId.findOne({ name: name });
-        const awayChannel = await ChannelId.findOne({ name: away });
-        if (nameChannel && awayChannel) {
-            const videoId=await fetchHighlight(name,nameChannel.channelId,away,awayChannel.channelId,date)
-               console.log(videoId)
-          console.log(nameChannel.channelId ,awayChannel.channelId);
-        } else {
-          // No document found with the specified name
-          console.log('No channel found with the name:', name);
-        }
-      } catch (error) {
-        // Handle any errors that occurred during the findOne operation
-        console.error('Error:', error.message);
-      }
-    // const videoId=await fetchHighlight(data.name,nameChannelId,data.away,awayChannelId,date)
-//    console.log(videoId)
-    //     if(!videoId){
-    //         cron.schedule('*/5 * * * *', fetchHighlight(name,nameChannelId,away,awayChannelId,date));
-    //     }else{
-    //         const data={
-    //             fictureId:fixtureId,
-    //             name:name,
-    //             away:away,
-    //             videoUrl:`https://www.youtube.com/watch?v=${videoId}`,
-    //             pubAfter:pubAfter,
-    //             pubBefore:pubBefore
-    //         }
-    //        Highlight(data).save()
-    //     }
-    //set schedule time
-    // const originalDate = new Date(`${pubAfter}`);
-    // const newDate = new Date(originalDate);
-    // //send to storeHighlight function
-    // storeHighlight(name,nameChannelId,away,awayChannelId)
-    // newDate.setMinutes(originalDate.getMinutes() + 20);
-    // const job = schedule.scheduleJob(newDate,storeHighlight );
+const Highlight = require('../model/youtubeHighlight');
+const ChannelId = require('../model/ChannelId');
+const upCommingMatch = require('../model/upcommingMatch');
+const fetchHighlight = require('../controller/fetchAPI');
+
+async function autoRun() {
+  const data = await upCommingMatch.find();
+
+  data.forEach(async (item) => {
+    const dateWithoutTimeZone = new Date(item.fixtureDate);
+    dateWithoutTimeZone.setHours(dateWithoutTimeZone.getHours() + 2);
+    
+    const job = schedule.scheduleJob(dateWithoutTimeZone, function recur() {
+      checkForHighlights(item, job);
+    });
+  });
 }
-const store=async (req,res)=>{
-    const {fixtureId}=req.params;
-    const data=await Match.findOne({fixtureId})
-    const nameChannel=ChannelId.findOne({name:data.name});
-    const nameChannelId=nameChannel.ChannelId;
-    const awayChannel=ChannelId.findOne({name:data.away})
-    const awayChannelId=awayChannel.ChannelId
-    storeHighlight(data.name,nameChannelId,data.away,awayChannelId,data.fixtureDate
-        )
+
+async function checkForHighlights(item, job) {
+  try {
+    const publishedAfter = new Date(item.fixtureDate);
+    const publishedBefore = new Date(item.fixtureDate);
+    publishedAfter.setHours(dateWithoutTimeZone.getHours() + 2);
+    publishedBefore.setHours(dateWithoutTimeZone.getHours() + 3);
+    // const publishedAfter = new Date(item.fixtureDate).toISOString().replace(/\.\d{3}Z$/, '');
+
+    const nameChannel = await ChannelId.findOne({ name: item.name });
+    const awayChannel = await ChannelId.findOne({ name: item.away });
+
+    if (!nameChannel || !awayChannel) {
+      console.log('Channel info not found');
+      return;
+    }
+
+    const youtubeData = await fetchHighlight(item.name, nameChannel.channelId, item.away, awayChannel.channelId, publishedAfter,publishedBefore);
+
+    if (youtubeData) {
+      const data = {
+        fixtureId: item.fixtureId,
+        name: item.name,
+        away: item.away,
+        videoUrl: `https://www.youtube.com/watch?v=${youtubeData.id.videoId}`,
+        thumbnailsurl: youtubeData.snippet.thumbnails.medium.url,
+        thumbnailswidth: youtubeData.snippet.thumbnails.medium.width,
+        thumbnailsheight: youtubeData.snippet.thumbnails.medium.height,
+        pubAfter: publishedAfter,
+      };
+
+      await Highlight.create(data); // Assuming Highlight is a Mongoose model
+      console.log('Video URL added');
+      job.cancel(); // Cancel the scheduled job as the data is found
+    } else {
+      console.log('Data not found, retrying in 5 minutes...');
+      // Reschedule the job for 5 minutes later
+      job.reschedule('*/5 * * * *');
+    }
+  } catch (error) {
+    console.error('Error in checkForHighlights:', error);
+  }
 }
-module.exports={autoRun}
+
+module.exports = { autoRun };

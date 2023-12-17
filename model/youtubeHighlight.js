@@ -1,4 +1,5 @@
 const mongoose=require('mongoose')
+const { MongoClient, Int32, Long } = require('mongodb');
 const highlightSchema=mongoose.Schema({
     name:{
         type:String
@@ -12,6 +13,18 @@ const highlightSchema=mongoose.Schema({
     videoUrl:{
         type:String
     },
+    
+        thumbnailsurl:{
+            type:String
+        },
+        thumbnailswidth:{
+            type:Number
+        },
+        thumbnailsheight:{
+        type:Number
+       },
+
+    
     pubBefore:{
         type:Date
     },
