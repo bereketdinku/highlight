@@ -53,17 +53,18 @@ const totalDuration = 60;
       console.log('Video URL added');
       job.cancel(); // Cancel the scheduled job as the data is found
     } else {
-      console.log('Data not found, retrying in 5 minutes...');
-      elapsedMinutes += 5;
-      if (elapsedMinutes >= totalDuration) {
-        // Cancel the job after one hour
-        job.cancel();
-        console.log('Job completed after one hour.');
-      }else{
-        //Reschedule the job for 5 minutes later only for one hour
-        job.reschedule('*/5 * * * *');
+      // console.log('Data not found, retrying in 5 minutes...');
+      // elapsedMinutes += 5;
+      // if (elapsedMinutes >= totalDuration) {
+      //   // Cancel the job after one hour
+      //   job.cancel();
+      //   console.log('Job completed after one hour.');
+      // }else{
+      //   //Reschedule the job for 5 minutes later only for one hour
+      //   job.reschedule('*/5 * * * *');
 
-      }
+      // }
+      return null
     }
   } catch (error) {
     console.error('Error in checkForHighlights:', error);
