@@ -1,35 +1,35 @@
-const mongoose=require('mongoose')
+const mongoose = require('mongoose')
 const { MongoClient, Int32, Long } = require('mongodb');
-const highlightSchema=mongoose.Schema({
-    name:{
-        type:String
+const highlightSchema = mongoose.Schema({
+    name: {
+        type: String
     },
-    away:{
-        type:String
+    away: {
+        type: String
     },
-    fictureId:{
-        type:String
+    fixtureId: {
+        type: String
     },
-    videoUrl:{
-        type:String
+    videoUrl: {
+        type: String
     },
-    
-        thumbnailsurl:{
-            type:String
-        },
-        thumbnailswidth:{
-            type:Number
-        },
-        thumbnailsheight:{
-        type:Number
-       },
 
-    
-    pubBefore:{
-        type:Date
+    thumbnailsurl: {
+        type: String
     },
-    pubAfter:{
-        type:Date
+    thumbnailswidth: {
+        type: Number
+    },
+    thumbnailsheight: {
+        type: Number
+    },
+
+
+    pubBefore: {
+        type: Date
+    },
+    pubAfter: {
+        type: Date
     }
 })
-module.exports=mongoose.model('highlight',highlightSchema)
+module.exports = mongoose.model('highlight', highlightSchema)

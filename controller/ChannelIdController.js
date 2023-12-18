@@ -46,7 +46,6 @@ const store=(req,res)=>{
       function storeChannel(){
         channelUrls.forEach((url) => {
                 const { clubName, channelId } = extractClubInfo(url);
-                // console.log(`${clubName}: ${channelId}`);
                 const data={
                     name:clubName,
                     channelId:channelId
@@ -54,10 +53,6 @@ const store=(req,res)=>{
                 ChannelId(data).save()
               });
       }
-  // Extract and print club names and channelIds
-//   channelUrls.forEach((url) => {
-//     const { clubName, channelId } = extractClubInfo(url);
-//     console.log(`${clubName}: ${channelId}`);
-//   });
+  
 
 module.exports={store,extractClubInfo,storeChannel}

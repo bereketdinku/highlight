@@ -13,9 +13,9 @@ const { channelUrls } = require("./const");
 const { storematch, upcommingMatchApi } = require("./match/matchList");
 const { matchApi } = require("./match/fetchMatchApi");
 const { fetchHighlight } = require("./controller/fetchAPI");
+const { storePrevious } = require("./autorun/storePrevious");
 mongoose.connect("mongodb+srv://bereketdinku:beki1234@cluster0.69ripac.mongodb.net/youtube",{ useNewUrlParser: true, serverSelectionTimeoutMS: 30000 });
 const db = mongoose.connection;
-// db.currentOp()
 db.on("error", (err) => {
   console.log(err);
 });
@@ -29,9 +29,17 @@ app.listen(8000, () => {
   console.log("Server is running on port 8000");
 });
 app.use("/api/highlight", router);
+//to extract club
 // extractClubInfo(channelUrls)
+
+// to club with channelId
 // storeChannel()
+
+//to store match
 // matchApi()
-// fetchHighlight('2024-02-17T15:00:00.000+00:00')
-//  upcommingMatchApi()
-autoRun()
+
+// to run upcomming match highlight
+// autoRun()
+
+//to run for previous match highlight
+// storePrevious()

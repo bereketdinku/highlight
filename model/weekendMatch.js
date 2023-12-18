@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const upcommingMatchSchema = mongoose.Schema({
+const weekendMatchSchema = mongoose.Schema({
     name: {
         type: String
     },
@@ -13,4 +13,4 @@ const upcommingMatchSchema = mongoose.Schema({
         type: Date
     }
 })
-module.exports = mongoose.model('upCommingmatch', upcommingMatchSchema)
+module.exports = mongoose.model('weekendmatch', weekendMatchSchema)

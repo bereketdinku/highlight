@@ -1,26 +1,20 @@
-const schedule = require('node-schedule');
 const Highlight = require('../model/youtubeHighlight');
 const ChannelId = require('../model/ChannelId');
-const upCommingMatch = require('../model/upcommingMatch');
 const fetchHighlight = require('../controller/fetchAPI');
-async function autoRun() {
-  const data = await upCommingMatch.find().sort({fixtureDate:1});
+const Match=require('../model/premieldgeMatch')
+async function storePrevious() {
+  const data = await Match.find().sort({fixtureDate:1});
 
   data.forEach(async (item) => {
     const dateWithoutTimeZone = new Date(item.fixtureDate);
     dateWithoutTimeZone.setHours(dateWithoutTimeZone.getHours() + 2);
     
-    const job = schedule.scheduleJob(dateWithoutTimeZone, function recur() {
-      checkForHighlights(item,job);
-    });
+      checkForHighlights(item);
   });
 }
 
-async function checkForHighlights(item,job) {
-  let elapsedMinutes = 0;
-const totalDuration = 60; 
+async function checkForHighlights(item) {
   try {
-
     const publishedAfter = new Date(item.fixtureDate);
     const publishedBefore = new Date(item.fixtureDate);
     publishedAfter.setHours(publishedAfter.getHours() + 2);
@@ -36,7 +30,6 @@ const totalDuration = 60;
     }
 
     const youtubeData = await fetchHighlight(item.name, nameChannel.channelId, item.away, awayChannel.channelId, publishedAfterWTZ,publishedBeforeWTZ);
-  //  console.log(youtubeData)
     if (youtubeData) {
       const data = {
         fixtureId: item.fixtureId,
@@ -49,25 +42,16 @@ const totalDuration = 60;
         pubAfter: publishedAfter,
       };
 
-      await Highlight.create(data); // Assuming Highlight is a Mongoose model
+      await Highlight.create(data); 
       console.log('Video URL added');
-      job.cancel(); // Cancel the scheduled job as the data is found
+      // job.cancel(); // Cancel the scheduled job as the data is found
     } else {
       console.log('Data not found, retrying in 5 minutes...');
-      elapsedMinutes += 5;
-      if (elapsedMinutes >= totalDuration) {
-        // Cancel the job after one hour
-        job.cancel();
-        console.log('Job completed after one hour.');
-      }else{
-        //Reschedule the job for 5 minutes later only for one hour
-        job.reschedule('*/5 * * * *');
-
-      }
+      
     }
   } catch (error) {
     console.error('Error in checkForHighlights:', error);
   }
 }
 
-module.exports = { autoRun };
+module.exports = { storePrevious };
