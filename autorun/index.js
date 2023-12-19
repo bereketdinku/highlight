@@ -5,15 +5,23 @@ const upCommingMatch = require('../model/upcommingMatch');
 const fetchHighlight = require('../controller/fetchAPI');
 async function autoRun() {
   const data = await upCommingMatch.find().sort({fixtureDate:1});
-
-  data.forEach(async (item) => {
+  await processItems(data);
+ 
+}
+async function processItems(items) {
+  const promises = items.map(async (item) => {
     const dateWithoutTimeZone = new Date(item.fixtureDate);
     dateWithoutTimeZone.setHours(dateWithoutTimeZone.getHours() + 2);
-    
-    const job = schedule.scheduleJob(dateWithoutTimeZone, function recur() {
-      checkForHighlights(item,job);
+
+    return new Promise((resolve, reject) => {
+      const job = schedule.scheduleJob(dateWithoutTimeZone, function recur() {
+        checkForHighlights(item, job);
+        resolve(); // Resolve the promise once processing is complete
+      });
     });
   });
+
+  await Promise.all(promises);
 }
 
 async function checkForHighlights(item,job) {
